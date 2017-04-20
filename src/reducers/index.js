@@ -38,9 +38,7 @@ export default (state = user, action) => {
   }
 }
 
-/**
- * Our reducer
- */
+
 export function reduce(state = initialState, action) {
   switch (action.type) {
   // when we get the tokens... set the tokens!

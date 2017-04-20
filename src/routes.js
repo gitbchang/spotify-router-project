@@ -1,74 +1,79 @@
-import React from 'react';
-import { Router, Route, browserHistory } from 'react-router';
-import { createStore } from 'redux';
-import { Provider } from 'react-redux';
-import reducer from './reducers';
-import { logUser } from './actions/index';
-import { firebaseApp } from './firebase';
-import App from './components/App';
-import SignIn from './components/SignIn';
-import SignUp from './components/SignUp';
+'use strict';
 
-// import darkBaseTheme from 'material-ui/styles/baseThemes/darkBaseTheme';
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-import getMuiTheme from 'material-ui/styles/getMuiTheme';
+const Spotify = require('spotify-web-api-node');
+const querystring = require('querystring');
+const express = require('express');
+const router = new express.Router();
 
-import {
-  grey600,
-  fullWhite,
-} from '../node_modules/material-ui/styles/colors';
-import spacing from '../node_modules/material-ui/styles/spacing';
-import {fade} from '../node_modules/material-ui/utils/colorManipulator';
+const CLIENT_ID = process.env.client_id || '1f355714cb774cb4a4dbb60a6f035eb2';
+const CLIENT_SECRET = process.env.client_secret || '563cfb4fc8894913807215842f1c34c4';
+const REDIRECT_URI = process.env.redirect_uri || 'http://localhost:3000/callback';
+const STATE_KEY = 'spotify_auth_state';
+const scopes = ['user-read-private', 'user-read-email'];
 
-const muiTheme = getMuiTheme({
-  spacing: spacing,
-  fontFamily: 'Roboto:300, Helvetica Neue, Arial, sans-serif',
-  borderRadius: 2,
-  palette: {
-    primary1Color: '#1DB954',
-    primary2Color: '#1DB954',
-    primary3Color: grey600,
-    accent1Color: '#191414',
-    accent2Color: '#191414',
-    accent3Color: '#191414',
-    textColor: fullWhite,
-    secondaryTextColor: fade(fullWhite, 0.7),
-    alternateTextColor: fullWhite,
-    canvasColor: '#303030',
-    borderColor: fade(fullWhite, 0.3),
-    disabledColor: fade(fullWhite, 0.3),
-    pickerHeaderColor: fade(fullWhite, 0.12),
-    clockCircleColor: fade(fullWhite, 0.12),
-  },
+// configure spotify
+const spotifyApi = new Spotify({
+  clientId: CLIENT_ID,
+  clientSecret: CLIENT_SECRET,
+  redirectUri: REDIRECT_URI
 });
 
-const store = createStore(reducer);
+/** Generates a random string containing numbers and letters of N characters */
+const generateRandomString = N => (Math.random().toString(36)+Array(N).join('0')).slice(2, N+2);
 
-firebaseApp.auth().onAuthStateChanged(user => {
-  if(user) {
-    console.log('user has sign in or up', user);
-    const { email } = user;
-    store.dispatch(logUser(email));
-    browserHistory.push('/app');
+/**
+ * The /login endpoint
+ * Redirect the client to the spotify authorize url, but first set that user's
+ * state in the cookie.
+ */
+router.get('/login', (_, res) => {
+  const state = generateRandomString(16);
+  res.cookie(STATE_KEY, state);
+  res.redirect(spotifyApi.createAuthorizeURL(scopes, state));
+});
+
+/**
+ * The /callback endpoint - hit after the user logs in to spotifyApi
+ * Verify that the state we put in the cookie matches the state in the query
+ * parameter. Then, if all is good, redirect the user to the user page. If all
+ * is not good, redirect the user to an error page
+ */
+router.get('/callback', (req, res) => {
+  const { code, state } = req.query;
+  const storedState = req.cookies ? req.cookies[STATE_KEY] : null;
+  // first do state validation
+  if (state === null || state !== storedState) {
+    res.redirect('/#/error/state mismatch');
+  // if the state is valid, get the authorization code and pass it on to the client
   } else {
-    console.log('user has signed out or still needs to sign in');
-    browserHistory.replace('/signin');
+    res.clearCookie(STATE_KEY);
+    // Retrieve an access token and a refresh token
+    spotifyApi.authorizationCodeGrant(code).then(data => {
+      const { expires_in, access_token, refresh_token } = data.body;
+
+      // Set the access token on the API object to use it in later calls
+      spotifyApi.setAccessToken(access_token);
+      spotifyApi.setRefreshToken(refresh_token);
+
+      // use the access token to access the Spotify Web API
+      spotifyApi.getMe().then(({ body }) => {
+        console.log(body);
+      });
+
+      // we can also pass the token to the browser to make requests from there
+      res.redirect(`/#/user/${access_token}/${refresh_token}`);
+    }).catch(err => {
+      res.redirect('/#/error/invalid token');
+    });
   }
 });
 
+module.exports = router;
 
 
 
-module.exports = ( 
-<Provider store={store}>
-  <MuiThemeProvider muiTheme={muiTheme}>
-  <Router path="/" history={browserHistory}>
-    <Route path="/app" component={App} />
-    <Route path="/signin" component={SignIn} />
-    <Route path="/signup" component={SignUp} />
-  </Router>
-  </MuiThemeProvider>
-</Provider>
-  );
+
+
+
 
 
