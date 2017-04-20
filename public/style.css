@@ -1,0 +1,14 @@
+body {
+  background-color: #191414;
+}
+
+input:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0px 1000px white inset;
+    opacity: 0;
+}
+
+.sticky-footer {
+  background-color: #1DB954;
+  color: #191414;
+  border: 1px solid #1DB954;
+}

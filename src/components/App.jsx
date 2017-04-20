@@ -1,22 +1,16 @@
 import React, { Component } from 'react';
-import { firebaseApp } from '../firebase';
 import { connect } from 'react-redux';
 
-class App extends Component {
+import TopBar from './TopBar';
+import BottomBar from './BottomBar';
 
-  signOut() {
-    firebaseApp.auth().signOut();
-  }
+class App extends Component {
 
   render() {
     return (
       <div>
-        <button
-          className='btn btn-danger'
-          onClick={() => this.signOut()}
-        >
-          Sign Out
-        </button>
+        <TopBar />
+        <BottomBar />
       </div>
     )
   }

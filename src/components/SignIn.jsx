@@ -2,6 +2,14 @@ import React, { Component } from 'react';
 import { Link } from 'react-router';
 import { firebaseApp } from '../firebase';
 
+import RaisedButton from 'material-ui/RaisedButton';
+import TextField from 'material-ui/TextField';
+// import FlatButton from 'material-ui/FlatButton';
+import loginSVG from '../../public/log_in.svg';
+
+import TopBar from './TopBar';
+
+
 class SignIn extends Component {
   constructor(props) {
     super(props);
@@ -13,6 +21,7 @@ class SignIn extends Component {
       }
     }
   }
+
 
   signIn() {
     console.log('this.state', this.state);
@@ -26,31 +35,23 @@ class SignIn extends Component {
 
   render() {
     return (
-      <div className='form-inline' style={{margin: "5%"}}>
-        <h2>Sign In</h2>
-        <div className='form-group'>
-          <input 
-            type="text"
-            style={{marginRight: "5px"}}
-            className='form-control'
-            placeholder='email'
-            onChange={(event) => this.setState({email: event.target.value})}
-          />
-          <input 
-            type="password"
-            className='form-control'
-            style={{marginRight: "5px"}}
-            placeholder='password'
-            onChange={(event) => this.setState({password: event.target.value})}
-          />
-          <button className='btn btn-primary' type='button' onClick={() => this.signIn()}>
-            Sign In
-          </button>
-        </div>
-        <div>{this.state.error.message}</div>
-        <div>
-          <Link to={'/signup'}>Sign up instead</Link>
-        </div>
+      <div>
+        <TopBar />
+          <div className='form-inline' style={{margin: "5%"}}>
+            <div className='form-group'>
+              <TextField className='auto-clear' style={{marginRight: "5px"}} floatingLabelText="E-mail" onChange={(event)=> this.setState({email: event.target.value})} />
+                <TextField className='auto-clear' hintText="Password Field" floatingLabelText="Password" type="password" style={{marginRight: "5px"}} autoComplete="off" onChange={(event)=>
+                this.setState({password: event.target.value})} />
+                  <RaisedButton label='Sign In' primary={true} onClick={()=> this.signIn()}></RaisedButton>
+            </div>
+            <div>{this.state.error.message}</div>
+            <div>
+              <Link to={ '/signup'}>Sign up instead</Link>              
+            </div>
+            <div>
+              <a href="/login"><img style={{"width": "25%"}} src={loginSVG} alt="spotify-login-button"/></a>
+            </div>
+          </div>
       </div>
     );
   }
