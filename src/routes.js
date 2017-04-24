@@ -1,5 +1,3 @@
-'use strict';
-
 const Spotify = require('spotify-web-api-node');
 const querystring = require('querystring');
 const express = require('express');
@@ -7,7 +5,7 @@ const router = new express.Router();
 
 const CLIENT_ID = process.env.client_id || '1f355714cb774cb4a4dbb60a6f035eb2';
 const CLIENT_SECRET = process.env.client_secret || '563cfb4fc8894913807215842f1c34c4';
-const REDIRECT_URI = process.env.redirect_uri || 'http://localhost:3000/callback';
+const REDIRECT_URI = process.env.redirect_uri || 'http://localhost:9000/callback';
 const STATE_KEY = 'spotify_auth_state';
 const scopes = ['user-read-private', 'user-read-email'];
 

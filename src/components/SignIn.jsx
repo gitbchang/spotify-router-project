@@ -8,7 +8,7 @@ import TextField from 'material-ui/TextField';
 import loginSVG from '../../public/log_in.svg';
 
 import TopBar from './TopBar';
-
+import BottomBar from './BottomBar';
 
 class SignIn extends Component {
   constructor(props) {
@@ -21,7 +21,6 @@ class SignIn extends Component {
       }
     }
   }
-
 
   signIn() {
     console.log('this.state', this.state);
@@ -52,6 +51,7 @@ class SignIn extends Component {
               <a href="/login"><img style={{"width": "25%"}} src={loginSVG} alt="spotify-login-button"/></a>
             </div>
           </div>
+        <BottomBar />
       </div>
     );
   }

@@ -1,16 +1,17 @@
 // eslint-disable-next-line
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Router, Route, browserHistory } from 'react-router';
+import { Router, Route, browserHistory, IndexRoute, IndexLink } from 'react-router';
 import { firebaseApp } from './firebase';
 // Redux imports
 import { createStore, combineReducers, applyMiddleware } from 'redux';
 import thunk from 'redux-thunk';
 import { Provider } from 'react-redux';
 import reducer from './reducers';
-import { syncHistoryWithStore, routerMiddleware } from 'react-router-redux';
+import { syncHistory, routerMiddleware } from 'react-router-redux';
+// import { logUser } from './actions/index';
 
-import { logUser } from './actions/index';
+
 
 // Components
 import App from './components/App';
@@ -54,17 +55,17 @@ import injectTapEventPlugin from 'react-tap-event-plugin';
 // http://stackoverflow.com/a/34015469/988941
 injectTapEventPlugin();
 
-// const createStoreWithMiddleware = applyMiddleware(
-//   thunk,
-//   reduxRouterMiddleware
-// )(createStore);
-// const store = createStoreWithMiddleware(reducer)
-// const reduxRouterMiddleware = syncHistoryWithStore(browserHistory, store);
+const reduxRouterMiddleware = syncHistory(browserHistory)
+const createStoreWithMiddleware = applyMiddleware(
+  thunk,
+  reduxRouterMiddleware
+)(createStore)
+const store = createStoreWithMiddleware(reducer)
 
-const store = createStore(
-  reducer,
-  applyMiddleware(thunk)
-);
+// const store = createStore(
+//   reducer,
+//   applyMiddleware(thunk)
+// );
 
 // const store = createStore(reducer);
 
@@ -88,10 +89,13 @@ firebaseApp.auth().onAuthStateChanged(user => {
 ReactDOM.render(
     <Provider store={store}>
       <MuiThemeProvider muiTheme={muiTheme}>
-        <Router path="/" history={browserHistory}>
-          <Route path="/app" component={App} />
-          <Route path="/signin" component={SignIn} />
-          <Route path="/signup" component={SignUp} />
+        <Router history={browserHistory}>
+          <Route path="/" >
+            <IndexRoute component={SignIn} />
+            <Route path="/app" component={App} />
+            <Route path="/signin" component={SignIn} />
+            <Route path="/signup" component={SignUp} />
+            </Route>
         </Router>
       </MuiThemeProvider>
   </Provider>, 
