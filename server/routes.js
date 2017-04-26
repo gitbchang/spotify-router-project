@@ -1,3 +1,4 @@
+// Start of input
 const Spotify = require('spotify-web-api-node');
 const querystring = require('querystring');
 const express = require('express');
@@ -17,15 +18,33 @@ const spotifyApi = new Spotify({
 });
 
 /** Generates a random string containing numbers and letters of N characters */
-const generateRandomString = N => (Math.random().toString(36)+Array(N).join('0')).slice(2, N+2);
+const generateRandomString = function(length) {
+  var text = '';
+  var possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+
+  for (var i = 0; i < length; i++) {
+    text += possible.charAt(Math.floor(Math.random() * possible.length));
+  }
+  return text;
+};
 
 /**
  * The /login endpoint
  * Redirect the client to the spotify authorize url, but first set that user's
  * state in the cookie.
- */
+
 router.get('/login', (_, res) => {
   const state = generateRandomString(16);
+  res.cookie(STATE_KEY, state);
+  res.redirect(spotifyApi.createAuthorizeURL(scopes, state));
+});
+
+*/
+
+
+router.get('/login', (_, res) => {
+  const state = generateRandomString(16);
+  console.log('STATE-RANDOM #:', state);
   res.cookie(STATE_KEY, state);
   res.redirect(spotifyApi.createAuthorizeURL(scopes, state));
 });
@@ -41,7 +60,7 @@ router.get('/callback', (req, res) => {
   const storedState = req.cookies ? req.cookies[STATE_KEY] : null;
   // first do state validation
   if (state === null || state !== storedState) {
-    res.redirect('/#/error/state mismatch');
+    res.redirect('/error/state mismatch');
   // if the state is valid, get the authorization code and pass it on to the client
   } else {
     res.clearCookie(STATE_KEY);
@@ -59,19 +78,14 @@ router.get('/callback', (req, res) => {
       });
 
       // we can also pass the token to the browser to make requests from there
-      res.redirect(`/#/user/${access_token}/${refresh_token}`);
+      res.redirect(`/user/${access_token}/${refresh_token}`);
     }).catch(err => {
-      res.redirect('/#/error/invalid token');
+      res.redirect('/error/invalid token');
     });
   }
 });
 
 module.exports = router;
-
-
-
-
-
 
 
 

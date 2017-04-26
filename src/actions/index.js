@@ -12,7 +12,6 @@ export function logUser(email) {
   return action;
 }
 
-
 /** set the app's access and refresh tokens */
 export function setTokens({accessToken, refreshToken}) {
   if (accessToken) {

@@ -10,18 +10,22 @@ import loginSVG from '../../public/log_in.svg';
 import TopBar from './TopBar';
 import BottomBar from './BottomBar';
 
+import $ from "jquery";
+
 class SignIn extends Component {
   constructor(props) {
     super(props);
     this.state = {
       email: '',
       password: '',
+      stats: '',
       error: {
         message: ''
       }
     }
   }
 
+/*
   signIn() {
     console.log('this.state', this.state);
     const { email, password } = this.state;
@@ -31,6 +35,53 @@ class SignIn extends Component {
         this.setState({error});
       });
   }
+*/
+
+ login(callback) {
+   var CLIENT_ID = '1f355714cb774cb4a4dbb60a6f035eb2';
+   var REDIRECT_URI = 'http://jmperezperez.com/spotify-oauth-jsfiddle-proxy/';
+
+   function getLoginURL(scopes) {
+     return 'https://accounts.spotify.com/authorize?client_id=' + CLIENT_ID +
+       '&redirect_uri=' + encodeURIComponent(REDIRECT_URI) +
+       '&scope=' + encodeURIComponent(scopes.join(' ')) +
+       '&response_type=token';
+   }
+
+   var url = getLoginURL([
+     'user-read-email'
+   ]);
+
+   console.log(url);
+
+   var width = 450,
+     height = 730,
+     left = (screen.width / 2) - (width / 2),
+     top = (screen.height / 2) - (height / 2);
+
+   window.addEventListener("message", function (event) {
+     var hash = JSON.parse(event.data);
+     if (hash.type == 'access_token') {
+       callback(hash.access_token);
+     }
+   }, false);
+
+   var w = window.open(url,
+     'Spotify',
+     'menubar=no,location=no,resizable=no,scrollbars=no,status=no, width=' + width + ', height=' + height + ', top=' + top + ', left=' + left
+   );
+
+ }
+
+  getUserData(accessToken) {
+   return $.ajax({
+     url: 'https://api.spotify.com/v1/me',
+     headers: {
+       'Authorization': 'Bearer ' + accessToken
+     }
+   });
+ }
+ 
 
   render() {
     return (
@@ -47,9 +98,21 @@ class SignIn extends Component {
             <div>
               <Link to={ '/signup'}>Sign up instead</Link>              
             </div>
-            <div>
-              <a href="/login"><img style={{"width": "25%"}} src={loginSVG} alt="spotify-login-button"/></a>
+            <div>             
+                <img 
+                  style={{"width": "25%"}} 
+                  src={loginSVG} 
+                  alt="spotify-login-button"
+                  onClick={() => this.login(function(accessToken){
+                    this.getUserData(accessToken).then(function(response){
+                      $(".results").html(response);     
+                      this.setState({stats: response});
+                      console.log('response', response);
+                    })
+                  })}  
+                />              
             </div>
+            <div className='results'></div>
           </div>
         <BottomBar />
       </div>

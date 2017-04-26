@@ -1,8 +1,22 @@
 import { SIGNED_IN, SPOTIFY_TOKENS, SPOTIFY_ME_BEGIN, SPOTIFY_ME_SUCCESS, SPOTIFY_ME_FAILURE } from '../constants';
-
+/*
 let user = {
   email: null
 }
+
+export default (state = user, action) => {
+  switch (action.type) {
+    case SIGNED_IN:
+    const email = action.email;
+    user = {
+      email
+    }
+    return user;
+    default: 
+      return state;
+  }
+}
+*/
 
 const initialState = {
   accessToken: null,
@@ -25,21 +39,7 @@ const initialState = {
 
 
 
-export default (state = user, action) => {
-  switch (action.type) {
-    case SIGNED_IN:
-    const email = action.email;
-    user = {
-      email
-    }
-    return user;
-    default: 
-      return state;
-  }
-}
-
-
-export function reduce(state = initialState, action) {
+export default function reduce(state = initialState, action) {
   switch (action.type) {
   // when we get the tokens... set the tokens!
   case SPOTIFY_TOKENS:

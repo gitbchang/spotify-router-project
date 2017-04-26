@@ -8,15 +8,16 @@ import { createStore, combineReducers, applyMiddleware } from 'redux';
 import thunk from 'redux-thunk';
 import { Provider } from 'react-redux';
 import reducer from './reducers';
-import { syncHistory, routerMiddleware } from 'react-router-redux';
+import { syncHistory, routerMiddleware, routeReducer  } from 'react-router-redux';
+import { createHistory } from 'history';
 // import { logUser } from './actions/index';
-
-
 
 // Components
 import App from './components/App';
 import SignIn from './components/SignIn';
 import SignUp from './components/SignUp';
+import SpotifyUser from './components/SpotifyUser';
+import Error from './components/Error';
 
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 // import darkBaseTheme from 'material-ui/styles/baseThemes/darkBaseTheme';
@@ -55,19 +56,16 @@ import injectTapEventPlugin from 'react-tap-event-plugin';
 // http://stackoverflow.com/a/34015469/988941
 injectTapEventPlugin();
 
-const reduxRouterMiddleware = syncHistory(browserHistory)
+
+// const store = createStore(reducer);
+
+// Sync dispatched route actions to the history
+const reduxRouterMiddleware = syncHistory(browserHistory);
 const createStoreWithMiddleware = applyMiddleware(
   thunk,
   reduxRouterMiddleware
-)(createStore)
-const store = createStoreWithMiddleware(reducer)
-
-// const store = createStore(
-//   reducer,
-//   applyMiddleware(thunk)
-// );
-
-// const store = createStore(reducer);
+)(createStore);
+const store = createStoreWithMiddleware(reducer);
 
 /* 
 // automatically push user to the app if they have logged in
@@ -83,6 +81,9 @@ firebaseApp.auth().onAuthStateChanged(user => {
     browserHistory.replace('/signin');
   }
 });
+
+<Route path="/user/:accessToken/:refreshToken" component={SpotifyUser} />
+<Route path="/error/:errorMsg" component={Error} />
 */
 
 
@@ -95,7 +96,9 @@ ReactDOM.render(
             <Route path="/app" component={App} />
             <Route path="/signin" component={SignIn} />
             <Route path="/signup" component={SignUp} />
-            </Route>
+            <Route path="/user/:accessToken/:refreshToken" component={SpotifyUser} />
+            <Route path="/error/:errorMsg" component={Error} />
+          </Route>
         </Router>
       </MuiThemeProvider>
   </Provider>, 
